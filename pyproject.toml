@@ -1,0 +1,17 @@
+# pyproject.toml
+[tool.poetry]
+name = "anti_procrastination"
+version = "0.1.0"
+description = "A CLI tool to overcome procrastination using LLM-powered motivation and task tracking."
+authors = ["zhouzhou_shen@qq.com"]
+license = "MIT"
+packages = [
+    { include = "assistant" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
