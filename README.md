@@ -54,7 +54,7 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
 2. **Configure Python environment**
 
-   `conda activate <vitual_env_name>` or `poetry env use python3.12`
+   `conda activate <virtual_env_name>` or `poetry env use python3.12`
 
    and then
    ```bash

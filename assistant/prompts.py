@@ -10,11 +10,14 @@ STATIC_QUOTES = [
     "Focus on being productive instead of busy. – Tim Ferriss"
 ]
 
-def gentle_prompt(task_name: str):
-    print("\n⏰ Gentle Reminder: Stay focused on your task —", task_name)
+def gentle_prompt(task_name: str, return_str: bool = False):
     try:
         quote = get_llm_quote()
     except Exception:
         quote = random.choice(STATIC_QUOTES)
-    print("\n✨ Motivation:", quote)
+
+    message = f"⏰ Stay focused on {task_name} — {quote} 💪"
+    if return_str:
+        return message
+    print("\n" + message)
     print("Even a small step forward counts. You've got this!")

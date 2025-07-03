@@ -1,27 +1,46 @@
+"""cli.py
+The entrance of the program.
+"""
+
+from rich.console import Console
+from rich.panel import Panel
+from rich.prompt import Prompt
 from assistant.core import start_focus_session, view_log
 
-def main():
+console = Console()
+
+
+def main_menu():
     while True:
-        print("\n==== Anti-Procrastination Assistant ====")
-        print("1. Start new task session")
-        print("2. View task log")
-        print("3. Exit")
-        choice = input("Choose an option: ")
+        console.clear()
+        panel = Panel(
+            "[bold cyan]1.[/bold cyan] Start new task session\n"
+            "[bold cyan]2.[/bold cyan] View task log\n"
+            "[bold cyan]3.[/bold cyan] Exit",
+            title="[bold magenta]Anti-Procrastination Assistant[/bold magenta]",
+            border_style="bright_blue",
+        )
+        console.print(panel)
 
-        if choice == '1':
-            task = input("Enter your task name: ").strip()
+        choice = Prompt.ask(
+            "[yellow]Choose an option[/yellow]", choices=["1", "2", "3"], default="1"
+        )
+        if choice == "1":
+            task_name = Prompt.ask("Enter your task name")
             try:
-                duration = int(input("Enter session duration in minutes (default 25): ") or 25)
-                start_focus_session(task, duration)
+                duration = int(
+                    Prompt.ask("Enter session duration in minutes", default="25")
+                )
+                start_focus_session(task_name, duration)
             except ValueError:
-                print("Invalid duration. Try again.")
-        elif choice == '2':
+                console.print("[red]Invalid duration. Try again.[/red]")
+        elif choice == "2":
             view_log()
-        elif choice == '3':
-            print("Goodbye. Stay mindful and consistent.")
+            input("\nPress Enter to return to main menu...")
+        elif choice == "3":
+            console.print("[green]Goodbye. Stay mindful and consistent.[/green]")
             break
-        else:
-            print("Invalid choice. Try again.")
 
-if __name__ == '__main__':
-    main()
+
+if __name__ == "__main__":
+    main_menu()
