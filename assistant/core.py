@@ -4,7 +4,7 @@ Core functions are defined here.
 
 import time
 import sys
-import datetime
+from datetime import datetime
 import json
 import os
 
@@ -24,6 +24,14 @@ from rich.live import Live
 from rich.text import Text
 from threading import Timer, Thread
 
+from assistant.db import (
+    log_task,
+    get_all_sessions,
+    get_sessions_by_date,
+    get_sessions_by_task,
+    get_distinct_tasks,
+    get_logs  # 已有：最近 N 条
+)
 from assistant.prompts import gentle_prompt
 
 
@@ -36,35 +44,6 @@ latest_reminder = {"text": "Stay focused..."}
 class ReminderColumn(ProgressColumn):
     def render(self, task):
         return Text(latest_reminder["text"], style="yellow")
-
-
-def log_task(task_name, start_time, end_time, distractions):
-    log_dir = os.path.dirname(LOG_FILE)
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-
-    if os.path.exists(LOG_FILE):
-        try:
-            with open(LOG_FILE, "r") as f:
-                log = json.load(f)
-        except:
-            log = {}
-    else:
-        log = {}
-
-    if task_name not in log:
-        log[task_name] = []
-    log[task_name].append(
-        {
-            "start": start_time.isoformat(),
-            "end": end_time.isoformat(),
-            "duration_minutes": round((end_time - start_time).total_seconds() / 60, 2),
-            "distractions": distractions,
-        }
-    )
-
-    with open(LOG_FILE, "w") as f:
-        json.dump(log, f, indent=2)
 
 
 def make_prompt_callback(task_name):
@@ -80,7 +59,7 @@ def make_prompt_callback(task_name):
 
 def start_focus_session(task_name, duration_minutes):
     duration_seconds = duration_minutes * 60
-    start_time = datetime.datetime.now()
+    start_time = datetime.now()
     console.print(
         f"\n[bold green]🎯 Starting session:[/bold green] {task_name} ({duration_minutes} min)"
     )
@@ -121,7 +100,7 @@ def start_focus_session(task_name, duration_minutes):
         for timer in prompt_timers:
             timer.cancel()
 
-    end_time = datetime.datetime.now()
+    end_time = datetime.now()
     console.print(
         f"\n[green]✅ Session complete! End time: {end_time.strftime('%H:%M:%S')}[/green]"
     )
@@ -148,29 +127,59 @@ def start_focus_session(task_name, duration_minutes):
 
 
 def view_log():
-    if not os.path.exists(LOG_FILE):
-        console.print("[red]No log file found.[/red]")
+    console.clear()
+    choice = Prompt.ask(
+        "[yellow]Select log view mode[/yellow]",
+        choices=["all", "date", "task", "latest"],
+        default="latest"
+    )
+
+    if choice == "all":
+        rows = get_all_sessions()
+    elif choice == "date":
+        # —— 日期校验循环 —— 
+        while True:
+            date_str = Prompt.ask("Enter date (YYYY-MM-DD)")
+            try:
+                # 验证输入格式
+                datetime.strptime(date_str, "%Y-%m-%d")
+                break
+            except ValueError:
+                console.print("[red]Invalid date format. Please use YYYY-MM-DD[/red]")
+        rows = get_sessions_by_date(date_str)
+    elif choice == "task":
+        # 可先获取所有任务列表供选择：
+        tasks = get_distinct_tasks()
+        task_name = Prompt.ask("Select task", choices=tasks)
+        rows = get_sessions_by_task(task_name)
+    else:  # latest N entries
+        n = int(Prompt.ask("How many recent entries?", default="20"))
+        rows = get_logs(limit=n)
+
+    if not rows:
+        console.print("[yellow]No matching records.[/yellow]")
         return
 
-    with open(LOG_FILE, "r") as f:
-        try:
-            data = json.load(f)
-        except json.JSONDecodeError:
-            console.print("[red]Log file is corrupted.[/red]")
-            return
-
-    if not data:
-        console.print("[yellow]No task logs yet.[/yellow]")
-        return
-
-    for task, sessions in data.items():
-        table = Table(title=f"📘 Task: {task}", title_style="bold green")
-        table.add_column("Start")
-        table.add_column("End")
+    # —— 分页展示 —— 
+    page_size = 10
+    total = len(rows)
+    for offset in range(0, total, page_size):
+        chunk = rows[offset : offset + page_size]
+        table = Table(title="📘 Task Sessions", title_style="bold green")
+        table.add_column("Task")
+        table.add_column("Start", no_wrap=True, min_width=20)
+        table.add_column("End", no_wrap=True, min_width=20)
         table.add_column("Duration (min)")
         table.add_column("Distractions")
-        for s in sessions:
-            table.add_row(
-                s["start"], s["end"], str(s["duration_minutes"]), str(s["distractions"])
-            )
+
+        for task, start, end, duration, distractions in chunk:
+            table.add_row(task, start, end, str(duration), str(distractions))
+
         console.print(table)
+
+        # 如果还有未展示的，等待用户确认再继续
+        if offset + page_size < total:
+            Prompt.ask(f"Showing {offset+1}–{min(offset+page_size,total)} of {total}. Press Enter to continue", default="")
+
+    # 所有页面展示完毕后，按任意键返回主菜单
+    # Prompt.ask("End of logs. Press Enter to return to menu", default="")

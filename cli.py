@@ -5,12 +5,16 @@ The entrance of the program.
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
+
+
 from assistant.core import start_focus_session, view_log
+from assistant.db import init_db
 
 console = Console()
 
 
 def main_menu():
+    init_db()
     while True:
         console.clear()
         panel = Panel(
