@@ -15,7 +15,7 @@ def get_llm_quote():
             input=prompt.encode("utf-8"),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=10,
+            timeout=120,
             check=True,  # Explicitly set check to True to raise an error on non-zero exit
         )
         output = result.stdout.decode("utf-8").strip()
