@@ -60,7 +60,7 @@ def start_focus_session(task_name, duration_minutes):
         f"\n[bold green]🎯 Starting session:[/bold green] {task_name} ({duration_minutes} min)"
     )
 
-    default_interval = 5 * 60  # 每5分钟提醒一次
+    default_interval = 1 * 60  # Remind every 1 minute, can be adjusted
     prompts_count = max(1, int(duration_seconds / default_interval))
     timings = [
         duration_seconds / (prompts_count + 1) * (i + 1) for i in range(prompts_count)
