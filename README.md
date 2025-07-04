@@ -55,13 +55,14 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 2. **Configure Python environment**
 
    ```bash
-   uv sync
-   source .venv/Scripts/activate
+   uv sync [--link-mode=symlink]
+   source .venv/bin/activate
    ```
 
 3. **Pull LLM model** (optional, for dynamic quotes)
    ```bash
    ollama pull tinyllama
+   ollama serve
    ```
 
 ---
