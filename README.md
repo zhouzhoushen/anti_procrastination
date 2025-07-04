@@ -25,7 +25,7 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 - **Pomodoro Sessions**: Customize focus time and interval reminders.
 - **LLM Motivation**: Fetch motivational quotes from a local model (`tinyllama`) with static fallback.
 - **Distraction Tracking**: Log number of distractions and session durations.
-- **Session Logging**: JSON-based logs in `logs/task_log.json` for review.
+- **Session Logging**: JSON-based logs in `logs/tasks.db` for review.
 - **Easy CLI**: Single-command launch with clean interactive menu.
 
 ---
@@ -41,7 +41,7 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
 ### Prerequisites
 - Python 3.12+
-- [Poetry](https://python-poetry.org/)
+- [uv](https://docs.astral.sh/uv/)
 - [Ollama](https://ollama.com/) (for LLM quotes, optional)
 
 ### Setup
@@ -54,11 +54,9 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
 2. **Configure Python environment**
 
-   `conda activate <virtual_env_name>` or `poetry env use python3.12`
-
-   and then
    ```bash
-   poetry install
+   uv sync
+   source .venv/Scripts/activate
    ```
 
 3. **Pull LLM model** (optional, for dynamic quotes)
@@ -72,7 +70,7 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
 Run the CLI tool:
 ```bash
-poetry run python cli.py
+uv run python cli.py
 ```
 
 **Menu Options:**
@@ -90,11 +88,12 @@ anti_procrastination/
 │   ├── __init__.py
 │   ├── core.py          # Session management & logging
 │   ├── prompts.py       # Static + LLM prompt logic
-│   └── llm_quotes.py    # Ollama integration
+│   |── llm_quotes.py    # Ollama integration
+|   └—— db.py            
 ├── logs/                # Session logs (JSON)
-│   └── task_log.json
+│   └── tasks.db
 ├── cli.py               # Entry-point CLI script
-├── run.sh               # Optional launcher script
+├── run.cmd               # Optional launcher script
 ├── pyproject.toml       # Poetry configuration
 ├── README.md            # Project documentation
 └── requirements.txt     # (Optional) pip dependencies
@@ -106,7 +105,7 @@ anti_procrastination/
 
 - **Session Duration**: Default 25 minutes; change in the prompt.
 - **Prompt Interval**: Every 5 minutes; modify `prompt_interval` in `core.py`.
-- **Log File**: `logs/task_log.json`; move or rename in `core.py` if needed.
+- **Log File**: `logs/tasks.db`; move or rename in `core.py` if needed.
 
 ---
 
@@ -133,3 +132,9 @@ This project is licensed under the **MIT License**. See [LICENSE](LICENSE.txt) f
 ## 📞 Contact
 
 Created by [Zhouzhou Shen](https://github.com/zhouzhoushen). Feel free to open an issue or reach out on GitHub!
+
+## 💕 Reference
+
+* `cmatrix`
+* `fortune`
+* `sl`

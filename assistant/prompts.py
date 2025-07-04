@@ -7,8 +7,9 @@ STATIC_QUOTES = [
     "You don’t have to be great to start, but you have to start to be great. – Zig Ziglar",
     "Done is better than perfect. – Sheryl Sandberg",
     "Success is the sum of small efforts, repeated day in and day out. – Robert Collier",
-    "Focus on being productive instead of busy. – Tim Ferriss"
+    "Focus on being productive instead of busy. – Tim Ferriss",
 ]
+
 
 def gentle_prompt(task_name: str, return_str: bool = False):
     try:

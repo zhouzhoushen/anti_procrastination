@@ -3,14 +3,11 @@ Core functions are defined here.
 """
 
 import time
-import sys
 from datetime import datetime
-import json
 import os
 
-from rich.console import Console, Group
+from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.progress import (
     Progress,
@@ -20,9 +17,8 @@ from rich.progress import (
     TextColumn,
     ProgressColumn,
 )
-from rich.live import Live
 from rich.text import Text
-from threading import Timer, Thread
+from threading import Timer
 
 from assistant.db import (
     log_task,
@@ -30,7 +26,7 @@ from assistant.db import (
     get_sessions_by_date,
     get_sessions_by_task,
     get_distinct_tasks,
-    get_logs  # 已有：最近 N 条
+    get_logs,  # 已有：最近 N 条
 )
 from assistant.prompts import gentle_prompt
 
@@ -50,7 +46,7 @@ def make_prompt_callback(task_name):
     def callback():
         try:
             quote_text = gentle_prompt(task_name, return_str=True)
-        except:
+        except Exception:
             quote_text = "Even a small step forward counts. You've got this!"
         latest_reminder["text"] = quote_text
 
@@ -131,13 +127,13 @@ def view_log():
     choice = Prompt.ask(
         "[yellow]Select log view mode[/yellow]",
         choices=["all", "date", "task", "latest"],
-        default="latest"
+        default="latest",
     )
 
     if choice == "all":
         rows = get_all_sessions()
     elif choice == "date":
-        # —— 日期校验循环 —— 
+        # —— 日期校验循环 ——
         while True:
             date_str = Prompt.ask("Enter date (YYYY-MM-DD)")
             try:
@@ -160,7 +156,7 @@ def view_log():
         console.print("[yellow]No matching records.[/yellow]")
         return
 
-    # —— 分页展示 —— 
+    # —— 分页展示 ——
     page_size = 10
     total = len(rows)
     for offset in range(0, total, page_size):
@@ -179,7 +175,10 @@ def view_log():
 
         # 如果还有未展示的，等待用户确认再继续
         if offset + page_size < total:
-            Prompt.ask(f"Showing {offset+1}–{min(offset+page_size,total)} of {total}. Press Enter to continue", default="")
+            Prompt.ask(
+                f"Showing {offset + 1}–{min(offset + page_size, total)} of {total}. Press Enter to continue",
+                default="",
+            )
 
     # 所有页面展示完毕后，按任意键返回主菜单
     # Prompt.ask("End of logs. Press Enter to return to menu", default="")
