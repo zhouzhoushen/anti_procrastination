@@ -31,9 +31,6 @@ from assistant.db import (
 from assistant.prompts import gentle_prompt
 
 
-console = Console()
-LOG_FILE = os.path.join(os.getcwd(), "logs", "task_log.json")
-
 latest_reminder = {"text": "Stay focused..."}
 
 
@@ -53,14 +50,14 @@ def make_prompt_callback(task_name):
     return callback
 
 
-def start_focus_session(task_name, duration_minutes):
+def start_focus_session(task_name, duration_minutes, console):
     duration_seconds = duration_minutes * 60
     start_time = datetime.now()
     console.print(
         f"\n[bold green]🎯 Starting session:[/bold green] {task_name} ({duration_minutes} min)"
     )
 
-    default_interval = 1 * 60  # Remind every 1 minute, can be adjusted
+    default_interval = 2 * 60  # Remind every 2 minute, can be adjusted
     prompts_count = max(1, int(duration_seconds / default_interval))
     timings = [
         duration_seconds / (prompts_count + 1) * (i + 1) for i in range(prompts_count)
@@ -122,7 +119,7 @@ def start_focus_session(task_name, duration_minutes):
     log_task(task_name, start_time, end_time, distractions)
 
 
-def view_log():
+def view_log(console):
     console.clear()
     choice = Prompt.ask(
         "[yellow]Select log view mode[/yellow]",

@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 
 :: Activate virtual environment
-call source .venv/Scripts/activate
+call .venv\Scripts\activate
 
 :: Directly call poetry (now in the activated environment)
 uv run python cli.py

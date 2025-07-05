@@ -9,14 +9,20 @@ from rich.prompt import Prompt
 
 from assistant.core import start_focus_session, view_log
 from assistant.db import init_db
+from assistant.utils import ultimate_clear
 
 console = Console()
+
+
+def wait_and_clear():
+    input("\nPress Enter to return to main menu...")
+    ultimate_clear(console)
 
 
 def main_menu():
     init_db()
     while True:
-        console.clear()
+        ultimate_clear(console)
         panel = Panel(
             "[bold cyan]1.[/bold cyan] Start new task session\n"
             "[bold cyan]2.[/bold cyan] View task log\n"
@@ -35,12 +41,14 @@ def main_menu():
                 duration = int(
                     Prompt.ask("Enter session duration in minutes", default="25")
                 )
-                start_focus_session(task_name, duration)
+                start_focus_session(task_name, duration, console=console)
+                wait_and_clear()
             except ValueError:
                 console.print("[red]Invalid duration. Try again.[/red]")
+                wait_and_clear()
         elif choice == "2":
-            view_log()
-            input("\nPress Enter to return to main menu...")
+            view_log(console=console)
+            wait_and_clear()
         elif choice == "3":
             console.print("[green]Goodbye. Stay mindful and consistent.[/green]")
             break
