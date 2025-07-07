@@ -4,10 +4,8 @@ Core functions are defined here.
 
 import time
 from datetime import datetime
-import os
 
-from rich.console import Console
-from rich.table import Table
+from rich.table import Table, Column
 from rich.prompt import Prompt
 from rich.progress import (
     Progress,
@@ -18,7 +16,6 @@ from rich.progress import (
     ProgressColumn,
 )
 from rich.text import Text
-from threading import Timer
 
 from assistant.db import (
     log_task,
@@ -35,8 +32,22 @@ latest_reminder = {"text": "Stay focused..."}
 
 
 class ReminderColumn(ProgressColumn):
+    """Custom column that displays dynamic motivational reminders."""
+    def __init__(self, reminder_text_func):
+        super().__init__()
+        self.reminder_text_func = reminder_text_func
+
     def render(self, task):
-        return Text(latest_reminder["text"], style="yellow")
+        text = self.reminder_text_func() or ""
+        return Text(text, style="bold yellow")
+    
+    def get_table_column(self) -> Column:
+        """Return a Column for the reminder."""
+        return Column(
+            header="Reminder",
+            justify="left",
+            no_wrap=False,
+        )
 
 
 def make_prompt_callback(task_name):
@@ -62,8 +73,9 @@ def start_focus_session(task_name, duration_minutes, console):
     timings = [
         duration_seconds / (prompts_count + 1) * (i + 1) for i in range(prompts_count)
     ]
+    next_reminder_index = 0
 
-    reminder_column = ReminderColumn()
+    reminder_column = ReminderColumn(lambda: latest_reminder["text"])
 
     with Progress(
         SpinnerColumn(),
@@ -76,22 +88,22 @@ def start_focus_session(task_name, duration_minutes, console):
     ) as progress:
         task = progress.add_task("Focusing...", total=duration_seconds)
 
-        prompt_timers = []
-        for t_sec in timings:
-            timer = Timer(t_sec, make_prompt_callback(task_name))
-            timer.daemon = True
-            timer.start()
-            prompt_timers.append(timer)
-
+        elapsed_time = 0
         try:
             while not progress.finished:
                 time.sleep(1)
+                elapsed_time += 1
                 progress.update(task, advance=1)
+                
+                if next_reminder_index < len(timings) and elapsed_time >= timings[next_reminder_index]:
+                    try:
+                        quote_text = gentle_prompt(task_name, return_str=True)
+                    except Exception:
+                        quote_text = "Even a small step forward counts. You've got this!"
+                    latest_reminder["text"] = quote_text
+                    next_reminder_index += 1
         except KeyboardInterrupt:
             console.print("\n[red]⛔ Session interrupted by user.[/red]")
-
-        for timer in prompt_timers:
-            timer.cancel()
 
     end_time = datetime.now()
     console.print(

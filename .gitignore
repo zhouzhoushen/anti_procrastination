@@ -215,3 +215,4 @@ logs/*
 playground.py
 demo.mp4
 favicons.zip
+*.png

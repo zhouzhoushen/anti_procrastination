@@ -11,7 +11,7 @@ from assistant.core import start_focus_session, view_log
 from assistant.db import init_db
 from assistant.utils import ultimate_clear
 
-console = Console()
+console = Console(force_terminal=True, force_interactive=True)
 
 
 def wait_and_clear():
