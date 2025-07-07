@@ -54,9 +54,10 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 2. **Configure Python environment**
 
    ```bash
-   uv venv [--link-mode=symlink]
+   uv venv   
    source .venv/bin/activate
-   uv pip install -e .
+   uv pip install -e . [--link-mode=symlink]
+   [uv pip install <package_name> [--link-mode=symlink]](if error occurs when installing some packages during the last step)
    ```
 
 3. **Pull LLM model** (optional, for dynamic quotes)
