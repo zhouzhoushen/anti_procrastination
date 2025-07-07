@@ -29,7 +29,7 @@ from apologies_for_being_human.db import (
     log_checkin,
     get_checkin_records,
 )
-from src.apologies_for_being_human.prompts import gentle_prompt
+from apologies_for_being_human.prompts import gentle_prompt
 
 
 latest_reminder = {"text": "Stay focused..."}
