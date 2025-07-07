@@ -17,7 +17,7 @@ from rich.progress import (
 )
 from rich.text import Text
 
-from assistant.db import (
+from src.apologies_for_being_human.db import (
     log_task,
     get_all_sessions,
     get_sessions_by_date,
@@ -29,7 +29,7 @@ from assistant.db import (
     log_checkin,
     get_checkin_records,
 )
-from assistant.prompts import gentle_prompt
+from src.apologies_for_being_human.prompts import gentle_prompt
 
 
 latest_reminder = {"text": "Stay focused..."}

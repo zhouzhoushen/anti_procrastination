@@ -7,16 +7,16 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 
-from assistant.core import (
+from src.apologies_for_being_human.core import (
     start_focus_session,
     view_log,
     create_checkin_task,
     checkin,
     view_checkin_records,
 )
-from assistant.db import init_db
-from assistant.utils import ultimate_clear
-from assistant.statistics import display_checkin_statistics
+from src.apologies_for_being_human.db import init_db
+from src.apologies_for_being_human.utils import ultimate_clear
+from src.apologies_for_being_human.statistics import display_checkin_statistics
 
 console = Console(force_terminal=True, force_interactive=True)
 

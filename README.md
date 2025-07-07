@@ -55,7 +55,9 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
    ```bash
    uv sync [--link-mode=symlink]
+   uv venv
    source .venv/bin/activate
+   uv pip install -e .
    ```
 
 3. **Pull LLM model** (optional, for dynamic quotes)
@@ -70,7 +72,7 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
 Run the CLI tool:
 ```bash
-uv run python cli.py
+apologies_for_being_human
 ```
 
 ---
