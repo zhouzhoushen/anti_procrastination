@@ -1,4 +1,4 @@
-from src.apologies_for_being_human.db import connect_db
+from apologies_for_being_human.db import connect_db
 
 
 def get_checkin_task_statistics():

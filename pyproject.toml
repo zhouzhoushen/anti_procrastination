@@ -10,5 +10,8 @@ dependencies = [
     "ruff>=0.12.2",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [project.scripts]
 apologies_for_being_human = "apologies_for_being_human.__main__:main"

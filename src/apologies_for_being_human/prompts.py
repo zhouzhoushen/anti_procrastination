@@ -2,7 +2,7 @@
 
 import random
 
-from src.apologies_for_being_human.llm_quotes import get_llm_quote
+from apologies_for_being_human.llm_quotes import get_llm_quote
 
 STATIC_QUOTES = [
     "Start where you are. Use what you have. Do what you can. – Arthur Ashe",

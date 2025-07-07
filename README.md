@@ -54,8 +54,7 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 2. **Configure Python environment**
 
    ```bash
-   uv sync [--link-mode=symlink]
-   uv venv
+   uv venv [--link-mode=symlink]
    source .venv/bin/activate
    uv pip install -e .
    ```

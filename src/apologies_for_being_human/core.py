@@ -17,7 +17,7 @@ from rich.progress import (
 )
 from rich.text import Text
 
-from src.apologies_for_being_human.db import (
+from apologies_for_being_human.db import (
     log_task,
     get_all_sessions,
     get_sessions_by_date,
