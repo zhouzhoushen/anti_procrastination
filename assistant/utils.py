@@ -1,3 +1,5 @@
+"""assistant/utils.py"""
+
 import os
 import platform
 from rich.console import Console
@@ -8,5 +10,5 @@ def ultimate_clear(console: Console):
         os.system("cls")
     else:
         os.system("clear")
-    print("\033c", end="")  # VT100控制码强制重置
+    print("\033c", end="")  # VT100 control code to force reset
     console.clear()

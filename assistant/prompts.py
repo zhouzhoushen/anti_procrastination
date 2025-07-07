@@ -1,4 +1,5 @@
-# assistant/prompts.py
+"""assistant/prompts.py"""
+
 import random
 from assistant.llm_quotes import get_llm_quote
 

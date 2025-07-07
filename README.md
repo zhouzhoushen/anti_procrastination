@@ -1,4 +1,4 @@
-# Anti Procrastination
+# Apologies for Being Human
 
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-blue)
 ![GitHub license](https://img.shields.io/github/license/zhouzhoushen/anti_procrastination)
@@ -13,7 +13,6 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 - [Demo](#-demo)
 - [Installation](#-installation)
 - [Usage](#-usage)
-- [Project Structure](#-project-structure)
 - [Configuration](#-configuration)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -48,8 +47,8 @@ A lightweight CLI tool to help you overcome procrastination with structured Pomo
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/zhouzhoushen/anti_procrastination.git
-   cd anti_procrastination
+   git clone https://github.com/zhouzhoushen/apologies_for_being_human.git
+   cd apologies_for_being_human
    ```
 
 2. **Configure Python environment**
@@ -74,39 +73,13 @@ Run the CLI tool:
 uv run python cli.py
 ```
 
-**Menu Options:**
-1. **Start new task session** – enter task name and duration.
-2. **View task log** – review past sessions and distractions.
-3. **Exit**
-
----
-
-## 🗂 Project Structure
-
-```text
-anti_procrastination/
-├── assistant/           # Core modules
-│   ├── __init__.py
-│   ├── core.py          # Session management & logging
-│   ├── prompts.py       # Static + LLM prompt logic
-│   |── llm_quotes.py    # Ollama integration
-|   └—— db.py            
-├── logs/                # Session logs (JSON)
-│   └── tasks.db
-├── cli.py               # Entry-point CLI script
-├── run.cmd               # Optional launcher script
-├── pyproject.toml       # Poetry configuration
-├── README.md            # Project documentation
-└── requirements.txt     # (Optional) pip dependencies
-```
-
 ---
 
 ## ⚙️ Configuration
 
 - **Session Duration**: Default 25 minutes; change in the prompt.
-- **Prompt Interval**: Every 5 minutes; modify `prompt_interval` in `core.py`.
-- **Log File**: `logs/tasks.db`; move or rename in `core.py` if needed.
+- **Prompt Interval**: Every 2 minutes; modify `prompt_interval` in `core.py`.
+- **Log File**: `logs/apologies_for_being_human.db`; move or rename in `core.py` if needed.
 
 ---
 

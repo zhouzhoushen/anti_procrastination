@@ -1,4 +1,5 @@
-# assistant/llm_quotes.py
+"""assistant/llm_quotes.py"""
+
 import subprocess
 
 

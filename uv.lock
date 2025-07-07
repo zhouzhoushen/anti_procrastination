@@ -12,7 +12,7 @@ wheels = [
 ]
 
 [[package]]
-name = "anti-procrastination"
+name = "apologies-for-being-human"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

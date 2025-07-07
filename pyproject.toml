@@ -1,7 +1,7 @@
 [project]
-name = "anti_procrastination"
+name = "apologies_for_being_human"
 version = "0.1.0"
-description = "A CLI tool for anti procrastination"
+description = "A CLI tool for apologizing for being born as a human."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

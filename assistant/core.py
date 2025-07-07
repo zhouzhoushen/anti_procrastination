@@ -23,7 +23,11 @@ from assistant.db import (
     get_sessions_by_date,
     get_sessions_by_task,
     get_distinct_tasks,
-    get_logs,  # 已有：最近 N 条
+    get_logs,
+    create_checkin_task as db_create_checkin_task,
+    get_checkin_tasks,
+    log_checkin,
+    get_checkin_records,
 )
 from assistant.prompts import gentle_prompt
 
@@ -33,6 +37,7 @@ latest_reminder = {"text": "Stay focused..."}
 
 class ReminderColumn(ProgressColumn):
     """Custom column that displays dynamic motivational reminders."""
+
     def __init__(self, reminder_text_func):
         super().__init__()
         self.reminder_text_func = reminder_text_func
@@ -40,7 +45,7 @@ class ReminderColumn(ProgressColumn):
     def render(self, task):
         text = self.reminder_text_func() or ""
         return Text(text, style="bold yellow")
-    
+
     def get_table_column(self) -> Column:
         """Return a Column for the reminder."""
         return Column(
@@ -50,17 +55,6 @@ class ReminderColumn(ProgressColumn):
         )
 
 
-def make_prompt_callback(task_name):
-    def callback():
-        try:
-            quote_text = gentle_prompt(task_name, return_str=True)
-        except Exception:
-            quote_text = "Even a small step forward counts. You've got this!"
-        latest_reminder["text"] = quote_text
-
-    return callback
-
-
 def start_focus_session(task_name, duration_minutes, console):
     duration_seconds = duration_minutes * 60
     start_time = datetime.now()
@@ -68,7 +62,7 @@ def start_focus_session(task_name, duration_minutes, console):
         f"\n[bold green]🎯 Starting session:[/bold green] {task_name} ({duration_minutes} min)"
     )
 
-    default_interval = 2 * 60  # Remind every 2 minute, can be adjusted
+    default_interval = 2 * 60
     prompts_count = max(1, int(duration_seconds / default_interval))
     timings = [
         duration_seconds / (prompts_count + 1) * (i + 1) for i in range(prompts_count)
@@ -94,12 +88,17 @@ def start_focus_session(task_name, duration_minutes, console):
                 time.sleep(1)
                 elapsed_time += 1
                 progress.update(task, advance=1)
-                
-                if next_reminder_index < len(timings) and elapsed_time >= timings[next_reminder_index]:
+
+                if (
+                    next_reminder_index < len(timings)
+                    and elapsed_time >= timings[next_reminder_index]
+                ):
                     try:
                         quote_text = gentle_prompt(task_name, return_str=True)
                     except Exception:
-                        quote_text = "Even a small step forward counts. You've got this!"
+                        quote_text = (
+                            "Even a small step forward counts. You've got this!"
+                        )
                     latest_reminder["text"] = quote_text
                     next_reminder_index += 1
         except KeyboardInterrupt:
@@ -128,6 +127,7 @@ def start_focus_session(task_name, duration_minutes, console):
         except ValueError:
             console.print("[red]Please enter a valid number.[/red]")
 
+    latest_reminder["text"] = "Stay focused..."
     log_task(task_name, start_time, end_time, distractions)
 
 
@@ -142,22 +142,19 @@ def view_log(console):
     if choice == "all":
         rows = get_all_sessions()
     elif choice == "date":
-        # —— 日期校验循环 ——
         while True:
             date_str = Prompt.ask("Enter date (YYYY-MM-DD)")
             try:
-                # 验证输入格式
                 datetime.strptime(date_str, "%Y-%m-%d")
                 break
             except ValueError:
                 console.print("[red]Invalid date format. Please use YYYY-MM-DD[/red]")
         rows = get_sessions_by_date(date_str)
     elif choice == "task":
-        # 可先获取所有任务列表供选择：
         tasks = get_distinct_tasks()
         task_name = Prompt.ask("Select task", choices=tasks)
         rows = get_sessions_by_task(task_name)
-    else:  # latest N entries
+    else:
         n = int(Prompt.ask("How many recent entries?", default="20"))
         rows = get_logs(limit=n)
 
@@ -165,7 +162,6 @@ def view_log(console):
         console.print("[yellow]No matching records.[/yellow]")
         return
 
-    # —— 分页展示 ——
     page_size = 10
     total = len(rows)
     for offset in range(0, total, page_size):
@@ -182,12 +178,102 @@ def view_log(console):
 
         console.print(table)
 
-        # 如果还有未展示的，等待用户确认再继续
         if offset + page_size < total:
             Prompt.ask(
                 f"Showing {offset + 1}–{min(offset + page_size, total)} of {total}. Press Enter to continue",
                 default="",
             )
 
-    # 所有页面展示完毕后，按任意键返回主菜单
-    # Prompt.ask("End of logs. Press Enter to return to menu", default="")
+
+def create_checkin_task(console):
+    task_name = Prompt.ask("Enter the name of the check-in task")
+    description = Prompt.ask("Enter a description (optional)", default="")
+    db_create_checkin_task(task_name, description)
+    console.print(f"[green]Check-in task '{task_name}' created successfully![/green]")
+
+
+def checkin(console):
+    tasks = get_checkin_tasks()
+    if not tasks:
+        console.print(
+            "[yellow]No check-in tasks found. Please create one first.[/yellow]"
+        )
+        return
+    task_choices = [f"{task[0]}: {task[1]}" for task in tasks]
+    console.print("[yellow]Available check-in tasks:[/yellow]")
+    for choice in task_choices:
+        console.print(choice)
+    task_input = Prompt.ask("Enter the task ID or name to check-in")
+    try:
+        task_id = int(task_input)
+        if task_id not in [task[0] for task in tasks]:
+            console.print("[red]Invalid task ID.[/red]")
+            return
+    except ValueError:
+        task_names = [task[1].lower() for task in tasks]
+        if task_input.lower() in task_names:
+            task_id = tasks[task_names.index(task_input.lower())][0]
+        else:
+            console.print("[red]Invalid task name.[/red]")
+            return
+    success = (
+        Prompt.ask(
+            "Did you complete the task successfully?",
+            choices=["yes", "no"],
+            default="yes",
+        )
+        == "yes"
+    )
+    note = Prompt.ask("Add a note (optional)", default="")
+    log_checkin(task_id, success, note)
+    console.print("[green]Check-in recorded successfully![/green]")
+
+
+def view_checkin_records(console):
+    choice = Prompt.ask(
+        "[yellow]Select view mode[/yellow]",
+        choices=["all", "by_task", "by_date"],
+        default="all",
+    )
+    if choice == "all":
+        records = get_checkin_records()
+    elif choice == "by_task":
+        tasks = get_checkin_tasks()
+        task_choices = [f"{task[0]}: {task[1]}" for task in tasks]
+        console.print("[yellow]Available tasks:[/yellow]")
+        for choice in task_choices:
+            console.print(choice)
+        task_input = Prompt.ask("Enter the task ID or name")
+        try:
+            task_id = int(task_input)
+            if task_id not in [task[0] for task in tasks]:
+                console.print("[red]Invalid task ID.[/red]")
+                return
+        except ValueError:
+            task_names = [task[1].lower() for task in tasks]
+            if task_input.lower() in task_names:
+                task_id = tasks[task_names.index(task_input.lower())][0]
+            else:
+                console.print("[red]Invalid task name.[/red]")
+                return
+        records = get_checkin_records(checkin_task_id=task_id)
+    elif choice == "by_date":
+        date_str = Prompt.ask("Enter date (YYYY-MM-DD)")
+        records = get_checkin_records(date=date_str)
+
+    if not records:
+        console.print("[yellow]No records found.[/yellow]")
+        return
+
+    table = Table(title="📘 Check-in Records", title_style="bold green")
+    table.add_column("Task Name")
+    table.add_column("Check-in Time")
+    table.add_column("Success")
+    table.add_column("Note")
+
+    for record in records:
+        task_name, checkin_time, success, note = record
+        success_str = "Yes" if success else "No"
+        table.add_row(task_name, checkin_time, success_str, note)
+
+    console.print(table)
