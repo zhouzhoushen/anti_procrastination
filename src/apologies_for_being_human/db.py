@@ -49,8 +49,10 @@ def init_db():
         initial_tasks = [
             "Slept early yesterday, woke up early today, got 8 hours of sleep",
             "Exercised as planned",
-            "Time Bank",
+            "Did algorithm or programming",
             "Processed emails",
+            "Checked schedules and notes",
+            "Kept in mind that energy is finite, so I should not waste it",
             "Nothing can really get me out of pain, so endure or be eliminated",
             "Sorry for being human",
         ]
